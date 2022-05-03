@@ -1,0 +1,183 @@
+﻿@{
+    Layout = "~/Views/Shared/_Layout.cshtml";
+
+}
+
+<script>
+        $(document).ready(function () {
+            var apiurl = "/api/WebApi";
+            $("#btnCreate").on("click", fnCreate);
+            $("#btnEdit").on("click", fnEdit);
+            $("#btnDelete").on("click", fnDelete);
+            fnLoadData();
+
+            function fnLoadData() {
+                $.ajax({
+                    url: apiurl,
+                    type: 'GET',
+                    success: function (data) {
+                        $("#tableshow").empty();
+                        for (var i = 0; i < data.length; i++) {
+                            $("#tableshow").append(
+                                "<tr>" +
+                                "<td>" + data[i].Id + "</td>" +
+                                "<td>" + data[i].Name + "</td>" +
+                                "<td>" + data[i].Phone + "</td>" +
+                                "<td>" + data[i].Email + "</td>" +
+                                "<td>" + data[i].Address + "</td>" +
+                                "<td><input type='button' value='選取' id='btn" + i
+                                + "' class='btn btn-info' /></td>" +
+
+                                "</tr>"
+
+                            );
+                            $("#btn" + i).on("click", { fId: data[i].Id }, fnSelectData);
+                            //$("#btn" + i).click(function () {
+                            //    alert("The paragraph was clicked.");
+                            //});
+
+                            //console.log(data[i].Id);
+                        }
+                        $("#Id").val("");
+                        $("#Name").val("");
+                        $("#Phone").val("");
+                        $("#Email").val("");
+                        $("#Address").val("");
+
+                    }
+
+                });
+
+            }
+            function fnSelectData(event) {
+                var Id = event.data.fId;
+                //console.log(Id);
+                $.ajax({
+                    url: apiurl + "?Id=" + encodeURI(Id),
+                    type: 'GET',
+                    success: function (data) {
+                        $("#Id").val(data.Id);
+                        $("#Name").val(data.Name);
+                        $("#Phone").val(data.Phone);
+                        $("#Email").val(data.Email);
+                        $("#Address").val(data.Address);
+                    }
+
+                });
+            }
+            function fnCreate() {
+                var r = confirm("確定要新增嗎");
+                if (r == true) {
+                    var Name, Phone, Email, Address;
+                    Name = $("#Name").val();
+                    Phone = $("#Phone").val();
+                    Email = $("#Email").val();
+                    Address = $("#Address").val();
+                    console.log(Name, Email);
+                    var data = "?Name=" + Name + "&Phone=" + Phone + "&Email=" + Email + "&Address=" + Address;
+                    $.ajax({
+                        url: apiurl + encodeURI(data),
+                        type: 'POST',
+                        success: function (result) {
+                            if (result != 0) {
+                                alert("新增成功");
+                                fnLoadData();
+                            } else {
+                                alert("新增失敗");
+
+                            }
+                        }
+                    }
+                    )
+                }
+            }
+            function fnEdit() {
+                var r = confirm("確定要修改嗎");
+                if (r == true) {
+                    var Id, Name, Phone, Email, Address;
+                    Id = $("#Id").val();
+                    Name = $("#Name").val();
+                    Phone = $("#Phone").val();
+                    Email = $("#Email").val();
+                    Address = $("#Address").val();
+                    var data = "?Id=" + Id + "&Name=" + Name + "&Phone=" + Phone + "&Email=" + Email + "&Address=" + Address;
+                    $.ajax({
+                        url: apiurl + data,
+                        type: 'PUT',
+                        success: function (result) {
+                            if (result != 0) {
+                                alert("修改成功");
+                                fnLoadData();
+                            } else {
+                                alert("修改失敗");
+
+                            }
+                        }
+                    }
+                    )
+
+                }
+            }
+            function fnDelete() {
+                var r = confirm("確定要刪除嗎?");
+                if (r == true) {
+                    var Id = $("#Id").val();
+                    console.log(Id);
+                    $.ajax({
+                        url: apiurl + "?Id=" + encodeURI(Id),
+                        type: 'DELETE',
+                        success: function (result) {
+                            if (result != 0) {
+
+                                alert("刪除成功");
+                                fnLoadData();
+                            } else {
+                                alert("刪除失敗");
+                            }
+                        }
+                    })
+                }
+            }
+        })
+</script>
+<div>
+    <h2>呼叫Web api進行非同步新增、修改、刪除</h2>
+    <div class="panel panel-primary">
+        <div class="panel-body">
+            <div class="form-group">
+                <label for="Id">編號</label>
+                <input type="text" class="form-control" id="Id" readonly />
+            </div>
+            <div class="form-group">
+                <label for="Name">姓名</label>
+                <input type="text" class="form-control" id="Name" required />
+            </div>
+            <div class="form-group">
+                <label for="Phone">電話</label>
+                <input type="text" class="form-control" id="Phone" required />
+            </div>
+            <div class="form-group">
+                <label for="Email">Email</label>
+                <input type="text" class="form-control" id="Email" required />
+            </div>
+            <div class="form-group">
+                <label for="Address">地址</label>
+                <input type="text" class="form-control" id="Address" required />
+            </div>
+            <input type="button" value="新增" id="btnCreate" class="btu btn-primary" />
+            <input type="button" value="編輯" id="btnEdit" class="btu btn-success" />
+            <input type="button" value="刪除" id="btnDelete" class="btu btn-danger" />
+        </div>
+    </div>
+    <table class="table">
+        <tr>
+            <td>編號</td>
+            <td>姓名</td>
+            <td>電話</td>
+            <td>Email</td>
+            <td>地址</td>
+        </tr>
+        <tbody id="tableshow"></tbody>
+    </table>
+
+</div>
